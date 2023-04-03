@@ -16,22 +16,21 @@ jobs:
           - os: ubuntu-latest
             compiler: llvm
     steps:
-      - name: checkout
-        uses: actions/checkout@v3
-      - name: checkout submodules
-        run: git submodule update --init --recursive --remote
-      - name: setup
-        uses: aminya/setup-cpp@v1
+      - uses: actions/checkout@v3
         with:
-          compiler: ${{ matrix.compiler }}
-          vcvarsall: ${{ contains(matrix.os, 'windows' )}}
-          cmake: true
-      - name: Setup vcpkg
+          submodules: true
+
+      - uses: lukka/get-cmake@latest
+
+      - name: Restore from cache and setup vcpkg executable and data files.
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgJsonGlob: vcpkg.json
+          vcpkgJsonGlob: 'vcpkg.json'
           vcpkgGitCommitId: 'a7b6122f6b6504d16d96117336a0562693579933'
-      - name: cmake
-        run: cmake -S . -B ./build -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
-      - name: build
-        run: cmake --build ./build
+
+      - name: Run CMake+vcpkg+Ninja to build packages and generate/build the code.
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: 'ninja-multiconfiguration-vcpkg'
+          buildPreset: 'ninja-multiconfiguration-vcpkg'
+          buildPresetAdditionalArgs: "[`--config`, `Release`]"
