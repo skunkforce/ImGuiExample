@@ -30,6 +30,7 @@ jobs:
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgJsonGlob: vcpkg.json
+          vcpkgGitCommitId: 'a7b6122f6b6504d16d96117336a0562693579933'
       - name: cmake
         run: cmake -S . -B ./build -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
       - name: build
