@@ -1,0 +1,34 @@
+name: C++ CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            compiler: msvc
+          - os: ubuntu-latest
+            compiler: gcc
+          - os: ubuntu-latest
+            compiler: llvm
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: checkout submodules
+        run: git submodule update --init --recursive --remote
+      - name: setup
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: ${{ matrix.compiler }}
+          vcvarsall: ${{ contains(matrix.os, 'windows' )}}
+          cmake: true
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+      - name: cmake
+        run: cmake -S . -B ./build -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
+      - name: build
+        run: cmake --build ./build
