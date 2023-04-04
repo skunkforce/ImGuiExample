@@ -54,3 +54,17 @@ jobs:
       - name: build
         run: |
           cmake --build ./build
+
+      - name: upload executable (Linux)
+        uses: actions/upload-artifact@v3
+        if: ${{ !contains(matrix.os, 'windows' ) }}
+        with:
+          name: executable
+          path: build/imgui_example
+
+      - name: upload executable (Windows)
+        uses: actions/upload-artifact@v3
+        if: ${{ !contains(matrix.os, 'windows' ) }}
+        with:
+          name: executable
+          path: build/Debug/imgui_example.exe
