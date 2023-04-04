@@ -121,6 +121,7 @@ int main() {
             ImPlot::SetupAxes("x", "y", 0, ImPlotAxisFlags_RangeFit | ImPlotAxisFlags_AutoFit);
             ImPlot::SetupAxisLimitsConstraints(ImAxis_X1, x_min, x_max);
         });
+        ImGui::End();
     };
 
     ImGuiInstance window{1280, 760, "Test"};
