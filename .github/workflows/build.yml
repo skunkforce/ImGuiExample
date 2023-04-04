@@ -64,7 +64,7 @@ jobs:
 
       - name: upload executable (Windows)
         uses: actions/upload-artifact@v3
-        if: ${{ !contains(matrix.os, 'windows' ) }}
+        if: ${{ contains(matrix.os, 'windows' ) }}
         with:
           name: executable
           path: build/Debug/imgui_example.exe
