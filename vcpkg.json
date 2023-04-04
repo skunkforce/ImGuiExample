@@ -1,1 +1,13 @@
-ImGuiInstance/vcpkg.json
+{
+	"name": "imgui-instance",
+	"version": "1.0",
+	"dependencies": [
+		{
+			"name": "imgui",
+			"features": [ "glfw-binding", "opengl3-binding" ]
+		},
+		"glfw3",
+		"glad",
+        "implot"
+	]
+}

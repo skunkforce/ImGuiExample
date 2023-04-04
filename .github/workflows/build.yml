@@ -15,25 +15,29 @@ jobs:
           - os: ubuntu-latest
             triplet: x64-linux
     env:
-      # Indicates the location of the vcpkg as a Git submodule of the project repository.
       VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-      # Tells vcpkg where binary packages are stored.
-      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg/bincache
-      # Let's use GitHub Action cache as storage for the vcpkg Binary Caching feature.
-      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+      VCPKG_BINARY_SOURCES: 'default'
 
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
-      - name: "Create directory '${{ env.VCPKG_DEFAULT_BINARY_CACHE }}'"
-        run: mkdir -p $VCPKG_DEFAULT_BINARY_CACHE
-        shell: bash
 
-      # Setup the build machine with the most recent versions of CMake and Ninja. Both are cached if not already: on subsequent runs both will be quickly restored from GitHub cache service.
-      - uses: lukka/get-cmake@latest
+      - name: setup
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: ${{ matrix.compiler }}
+          vcvarsall: ${{ contains(matrix.os, 'windows' )}}
+          cmake: true
 
-      - name: Restore from cache and setup vcpkg executable and data files.
+      - name: install deps
+        uses: awalsh128/cache-apt-pkgs-action@latest
+        if: ${{ !contains(matrix.os, 'windows' ) }}
+        with:
+          packages: libxinerama-dev libxcursor-dev xorg-dev libglu1-mesa-dev pkg-config
+          version: 1.0
+
+      - name: get vcpkg
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgJsonGlob: vcpkg.json
@@ -43,16 +47,10 @@ jobs:
       # As used here the Developer Command Prompt created is targeting x64 and using the default the Windows SDK.
       - uses: ilammy/msvc-dev-cmd@v1
 
-      # Run CMake to generate Ninja project files, using the vcpkg's toolchain file to resolve and install
-      # the dependencies as specified in vcpkg.json. Note that the vcpkg's toolchain is specified
-      # in the CMakePresets.json file.
-      # This step also runs vcpkg with Binary Caching leveraging GitHub Action cache to
-      # store the built packages artifacts.
-      - name: Restore from cache the dependencies and generate project files
+      - name: CMake configure
         run: |
           cmake -S . -B ./build -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake"
 
-      # Build (Release configuration only) the whole project with Ninja (which is spawn by CMake).
-      - name: Build (Release configuration)
+      - name: build
         run: |
-          cmake --build --config Release ./build
+          cmake --build ./build
