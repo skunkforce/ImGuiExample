@@ -57,7 +57,7 @@ jobs:
 
       - name: CMake configure
         if: ${{ contains(matrix.os, 'windows' ) }}
-        run: cmake -S . -B ./build -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake"
+        run: cmake -S . -B ./build -DCMAKE_TOOLCHAIN_FILE="${{ env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET="x64-windows-static"
 
       - name: build
         if: ${{ contains(matrix.os, 'windows' ) }}
@@ -75,4 +75,4 @@ jobs:
         if: ${{ contains(matrix.os, 'windows' ) }}
         with:
           name: executable-windows
-          path: build/Release
+          path: build/Release/imgui_example.exe
